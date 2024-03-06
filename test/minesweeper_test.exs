@@ -81,4 +81,82 @@ defmodule MinesweeperTest do
                     [false, false, false],
                     [false, false, false]]) == 3
   end
+
+  test "abre_posicao" do
+    mines_board = [[false, false, false],
+                  [false, false, false],
+                  [false, false, false]]
+    tab = [["-", "-", "-"],
+          ["-", "-", "-"],
+          ["-", "-", "-"]]
+    assert Minesweeper.abre_posicao(tab,mines_board,{0,0}) == [["0", "-", "-"],
+                                                              ["-", "-", "-"],
+                                                              ["-", "-", "-"]]
+    mines_board = [[false, false, false],
+                  [true, true, false],
+                  [false, false, false]]
+    tab = [["-", "-", "-"],
+          ["-", "-", "-"],
+          ["-", "-", "-"]]
+    assert Minesweeper.abre_posicao(tab,mines_board,{0,0}) == [["2", "-", "-"],
+                                                              ["-", "-", "-"],
+                                                              ["-", "-", "-"]]
+    mines_board = [[false, false, false],
+                  [false, false, false],
+                  [false, false, false]]
+    tab = [["0", "-", "-"],
+          ["-", "2", "-"],
+          ["-", "-", "-"]]
+    assert Minesweeper.abre_posicao(tab,mines_board,{1,1}) == [["0", "-", "-"],
+                                                              ["-", "2", "-"],
+                                                              ["-", "-", "-"]]
+    mines_board = [[false, false, false],
+                  [true, true, false],
+                  [false, false, false]]
+    tab = [["2", "-", "-"],
+          ["-", "-", "-"],
+          ["-", "-", "-"]]
+    assert Minesweeper.abre_posicao(tab,mines_board,{1,1}) == [["2", "-", "-"],
+                                                              ["-", "*", "-"],
+                                                              ["-", "-", "-"]]
+  end
+
+  test "abre_tabuleiro" do
+    mines_board = [[false, false, false],
+                  [true, true, false],
+                  [false, false, false]]
+    tab = [["2", "-", "-"],
+          ["-", "-", "-"],
+          ["-", "-", "-"]]
+    assert Minesweeper.abre_tabuleiro(tab,mines_board) == [["2", "2", "1"],
+                                                          ["*", "*", "1"],
+                                                          ["2", "2", "1"]]
+  end
+
+  test "generate_line_positions" do
+    assert Minesweeper.generate_line_positions(0,3) == [{0,0},{0,1},{0,2}]
+    assert Minesweeper.generate_line_positions(0,1) == [{0,0}]
+    assert Minesweeper.generate_line_positions(2,3) == [{2,0},{2,1},{2,2}]
+  end
+
+  test "generate_tab_positions" do
+    assert Minesweeper.generate_tab_positions(3,3) == [[{0,0},{0,1},{0,2}],
+                                                  [{1,0},{1,1},{1,2}],
+                                                  [{2,0},{2,1},{2,2}]]
+  end
+
+  test "abre_linha" do
+    mines_board = [[false, false, false],
+                    [true, true, false],
+                    [false, false, false]]
+    tab = [["2", "-", "-"],
+          ["-", "-", "-"],
+          ["-", "-", "-"]]
+    assert Minesweeper.abre_linha(tab,mines_board,[{0,0},{0,1},{0,2}]) == [["2", "2", "1"],
+                                                                          ["-", "-","-"],
+                                                                          ["-", "-","-"]]
+    assert Minesweeper.abre_linha(tab,mines_board,[{1,0},{1,1},{1,2}]) == [["2", "-", "-"],
+                                                                          ["*", "*","1"],
+                                                                          ["-", "-","-"]]                                                                  
+  end
 end

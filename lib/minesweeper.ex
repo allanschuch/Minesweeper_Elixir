@@ -8,13 +8,16 @@ defmodule Minesweeper do
   # na posição p do vetor. O vetor começa na posição 0 (zero). Não é necessário tratar erros.
 
   def get_arr([], _posicao), do: nil
+
   def get_arr([h|_t], 0), do: h 
+
   def get_arr([_h|t], posicao), do: get_arr(t,posicao-1) 
 
   # update_arr/3 (update array): recebe uma lista(vetor), uma posição (p) e um novo valor (v)e devolve um
   # novo vetor com o valor v na posição p. O vetor começa na posição 0 (zero)
 
   def update_arr([_h|t],0,valor), do: [valor|t]
+
   def update_arr([h|t],posicao,valor), do: [h|update_arr(t,posicao-1,valor)]
 
   # O tabuleiro do jogo é representado como uma matriz. Uma matriz, nada mais é do que um vetor de vetores.
@@ -25,12 +28,14 @@ defmodule Minesweeper do
   # Devolve o elemento na posicao tabuleiro[l,c]. Usar get_arr/2 na implementação
 
   def get_pos([h|_t],{0,coluna}), do: get_arr(h,coluna)
+
   def get_pos([_h|t],{linha,coluna}), do: get_pos(t,{linha-1,coluna})  
 
   # update_pos/4 (update position): recebe um tabuleiro, uma linha, uma coluna e um novo valor. Devolve
   # o tabuleiro modificado com o novo valor na posiçao linha x coluna. Usar update_arr/3 e get_arr/2 na implementação
 
   def update_pos([h|t],{0,coluna},valor), do: [update_arr(h,coluna,valor)|t]
+
   def update_pos([h|t],{linha,coluna},valor), do: [h|update_pos(t,{linha-1,coluna},valor)]
 
   # SEGUNDA PARTE: LÓGICA DO JOGO
@@ -104,6 +109,7 @@ defmodule Minesweeper do
   end
 
   def get_tam([_h|[]]), do: 1
+
   def get_tam([_h|t]), do: 1 + get_tam(t)
 
   # abre_jogada/4: é a função principal do jogo!!
@@ -127,19 +133,70 @@ defmodule Minesweeper do
 # Essa função verifica:
 # - Se a posição {l,c} já está aberta (contém um número), então essa posição não deve ser modificada
 # - Se a posição {l,c} contém uma mina no mapa de minas, então marcar  com "*" no tabuleiro
-# - Se a posição {l,c} está fechada (contém "-"), escrever o número de minas adjascentes a esssa posição no tabuleiro (usar conta_minas)
+# - Se a posição {l,c} está fechada (contém "-"), escrever o número de minas adjascentes a essa posição no tabuleiro (usar conta_minas)
 
-#def abre_posicao(tab,mapa_minas,l,c) do
-
+def abre_posicao(tab,mines_board,position) do
+  cond do
+    is_mine(mines_board,position) ->
+      update_pos(
+        tab,
+        position,
+        "*"
+      )
+    get_pos(tab,position) == "-" ->
+      update_pos(
+        tab,
+        position,
+        conta_minas_adj(mines_board,position)
+        |> Integer.to_string
+      )
+    true -> tab
+  end
+end
 
 # abre_tabuleiro/2: recebe o mapa de Minas e o tabuleiro do jogo, e abre todo o tabuleiro do jogo, mostrando
 # onde estão as minas e os números nas posições adjecentes às minas.Essa função é usada para mostrar
 # todo o tabuleiro no caso de vitória ou derrota. Para implementar esta função, usar a função abre_posicao/4
 
 
-  #def abre_tabuleiro(minas,tab) do
-  #   (...)
-  #end
+  def abre_tabuleiro(tab,mines_board) do
+    tamanho = get_tam(tab)
+    abre_tabuleiro_aux(
+      tab,
+      mines_board,
+      generate_tab_positions(tamanho,tamanho)
+    )
+  end
+
+  defp abre_tabuleiro_aux(tab,mines_board,[linha|[]]), do: abre_linha(tab,mines_board,linha)
+
+  defp abre_tabuleiro_aux(tab,mines_board,[linha|t]) do
+    abre_linha(
+      abre_tabuleiro_aux(tab,mines_board,t),
+      mines_board,
+      linha
+    )
+  end
+
+  def abre_linha(tab,mines_board,[posicao|[]]), do: abre_posicao(tab,mines_board,posicao)
+
+  def abre_linha(tab,mines_board,[posicao|t]) do
+    abre_posicao(
+      abre_linha(tab,mines_board,t),
+      mines_board,
+      posicao
+    )
+  end 
+
+  def generate_tab_positions(1,tamanho_c), do: [generate_line_positions(0,tamanho_c)]
+
+  def generate_tab_positions(tamanho_l,tamanho_c) do 
+    generate_tab_positions(tamanho_l-1,tamanho_c) ++ [generate_line_positions(tamanho_l-1,tamanho_c)]
+  end
+  
+  def generate_line_positions(index,1), do: [{index,0}]
+
+  def generate_line_positions(index,tamanho), do: generate_line_positions(index,tamanho-1) ++ [{index,tamanho-1}]
 
 # board_to_string/1: -- Recebe o tabuleiro do jogo e devolve uma string que é a representação visual desse tabuleiro.
 # Essa função é aplicada no tabuleiro antes de fazer o print dele na tela. Usar a sua imaginação para fazer um
