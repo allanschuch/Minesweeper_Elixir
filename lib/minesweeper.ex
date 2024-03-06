@@ -91,10 +91,6 @@ defmodule Minesweeper do
 
   def get_adj({l,c}), do: [{l,c-1},{l,c+1},{l-1,c-1},{l-1,c},{l-1,c+1},{l+1,c-1},{l+1,c},{l+1,c+1}]
 
-  #def get_first({first,_second}), do: first
-
-  #def get_second({_first,second}), do: second
-
   # conta_minas_adj/3: recebe um tabuleiro com o mapeamento das minas e uma  uma posicao  (linha e coluna), e conta quantas minas
   # existem nas posições adjacentes
 
@@ -104,8 +100,7 @@ defmodule Minesweeper do
       is_valid_pos(get_tam(tab),x)
       && is_mine(tab,x)
     end)
-    |> Enum.map(fn _x -> 1 end)
-    |> Enum.reduce(0,&(&1+&2))
+    |> Enum.count()
   end
 
   def get_tam([_h|[]]), do: 1
@@ -209,34 +204,44 @@ end
 
 # gera_lista/2: recebe um inteiro n, um valor v, e gera uma lista contendo n vezes o valor v
 
-  #def gera_lista(0,v), do: ...
-  #def gera_lista(n,v), do: ...
+  def gera_lista(1,v), do: [v]
+  
+  def gera_lista(n,v), do: [v|gera_lista(n-1,v)]
 
 # -- gera_tabuleiro/1: recebe o tamanho do tabuleiro de jogo e gera um tabuleiro  novo, todo fechado (todas as posições
 # contém "-"). Usar gera_lista
 
-  #def gera_tabuleiro(n), do: ...
+  def gera_tabuleiro(n), do: gera_lista(n,1) |> Enum.map(fn _x -> gera_lista(n,"-") end)
 
 # -- gera_mapa_de_minas/1: recebe o tamanho do tabuleiro e gera um mapa de minas zero, onde todas as posições contém false
 
-  #def gera_mapa_de_minas(n), do: ...
+  def gera_mapa_de_minas(n), do: gera_lista(n,1) |> Enum.map(fn _x -> gera_lista(n,false) end)
 
 
 # conta_fechadas/1: recebe um tabueleiro de jogo e conta quantas posições fechadas existem no tabuleiro (posições com "-")
 
-  #def conta_fechadas(tab) do
-  # (...)
-  #end
+  def conta_fechadas(tab) do
+    tab
+    |> Enum.flat_map(fn linha ->
+      Enum.filter(linha, &(&1 == "-")) 
+    end)
+    |> Enum.count()
+  end
 
 # -- conta_minas/1: Recebe o tabuleiro de Minas (MBoard) e conta quantas minas existem no jogo
 
-  #def conta_minas(minas) do
-  # (...)
-  #end
+  def conta_minas(mines_board) do
+    mines_board
+    |> Enum.flat_map(fn linha ->
+      Enum.filter(linha, &(&1 == true)) 
+    end)
+    |> Enum.count()
+  end
 
 # end_game?/2: recebe o tabuleiro de minas, o tauleiro do jogo, e diz se o jogo acabou.
 # O jogo acabou quando o número de casas fechadas é igual ao numero de minas
-  #def end_game(minas,tab), do:  ...
+  
+  def end_game(mines_board,tab), do:  conta_fechadas(tab) == conta_minas(mines_board)
 
 #### fim do módulo
 end
