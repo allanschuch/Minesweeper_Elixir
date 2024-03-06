@@ -24,14 +24,14 @@ defmodule Minesweeper do
   # get_pos/3 (get position): recebe um tabuleiro (matriz), uma linha (l) e uma coluna (c) (não precisa validar).
   # Devolve o elemento na posicao tabuleiro[l,c]. Usar get_arr/2 na implementação
 
-  def get_pos([h|_t],0,coluna), do: get_arr(h,coluna)
-  def get_pos([_h|t],linha,coluna), do: get_pos(t,linha-1,coluna)  
+  def get_pos([h|_t],{0,coluna}), do: get_arr(h,coluna)
+  def get_pos([_h|t],{linha,coluna}), do: get_pos(t,{linha-1,coluna})  
 
   # update_pos/4 (update position): recebe um tabuleiro, uma linha, uma coluna e um novo valor. Devolve
   # o tabuleiro modificado com o novo valor na posiçao linha x coluna. Usar update_arr/3 e get_arr/2 na implementação
 
-  def update_pos([h|t],0,coluna,valor), do: [update_arr(h,coluna,valor)|t]
-  def update_pos([h|t],linha,coluna,valor), do: [h|update_pos(t,linha-1,coluna,valor)]
+  def update_pos([h|t],{0,coluna},valor), do: [update_arr(h,coluna,valor)|t]
+  def update_pos([h|t],{linha,coluna},valor), do: [h|update_pos(t,{linha-1,coluna},valor)]
 
   # SEGUNDA PARTE: LÓGICA DO JOGO
 
@@ -52,14 +52,14 @@ defmodule Minesweeper do
   #
   # esse tabuleiro possuí minas nas posições 4x4 e 5x5
 
-  def is_mine(tab,l,c), do: get_pos(tab,l,c)
+  def is_mine(tab,{l,c}), do: get_pos(tab,{l,c})
 
   # is_valid_pos/3 recebe o tamanho do tabuleiro (ex, em um tabuleiro 9x9, o tamanho é 9),
   # uma linha e uma coluna, e diz se essa posição é válida no tabuleiro. Por exemplo, em um tabuleiro
   # de tamanho 9, as posições 1x3,0x8 e 8x8 são exemplos de posições válidas. Exemplos de posições
   # inválidas seriam 9x0, 10x10 e -1x8
 
-  def is_valid_pos(tamanho,l,c), do: l < tamanho && l >= 0 && c < tamanho && c >= 0
+  def is_valid_pos(tamanho,{l,c}), do: l < tamanho && l >= 0 && c < tamanho && c >= 0
 
   # valid_moves/3: Dado o tamanho do tabuleiro e uma posição atual (linha e coluna), retorna uma lista
   # com todas as posições adjacentes à posição atual
@@ -77,36 +77,27 @@ defmodule Minesweeper do
   #   ...    ...  ..
   # Uma maneira de resolver seria gerar todas as 8 posições adjacentes e depois filtrar as válidas usando is_valid_pos
 
-  def valid_moves(tam,l,c) do 
-    get_adj(l,c) 
+  def valid_moves(tam,position) do 
+    get_adj(position) 
     |> Enum.filter(fn(x) -> 
-      is_valid_pos(
-        tam,
-        get_first(x),
-        get_second(x))
+      is_valid_pos(tam,x)
     end)
   end
 
-  def get_adj(l,c), do: [{l,c-1},{l,c+1},{l-1,c-1},{l-1,c},{l-1,c+1},{l+1,c-1},{l+1,c},{l+1,c+1}]
+  def get_adj({l,c}), do: [{l,c-1},{l,c+1},{l-1,c-1},{l-1,c},{l-1,c+1},{l+1,c-1},{l+1,c},{l+1,c+1}]
 
-  def get_first({first,_second}), do: first
+  #def get_first({first,_second}), do: first
 
-  def get_second({_first,second}), do: second
+  #def get_second({_first,second}), do: second
 
   # conta_minas_adj/3: recebe um tabuleiro com o mapeamento das minas e uma  uma posicao  (linha e coluna), e conta quantas minas
   # existem nas posições adjacentes
 
-  def conta_minas_adj(tab,l,c) do
-    get_adj(l,c) 
+  def conta_minas_adj(tab,position) do
+    get_adj(position) 
     |> Enum.filter(fn(x) -> 
-      is_valid_pos(
-        get_tam(tab),
-        get_first(x),
-        get_second(x))
-      && is_mine(
-          tab,
-          get_first(x),
-          get_second(x))
+      is_valid_pos(get_tam(tab),x)
+      && is_mine(tab,x)
     end)
     |> Enum.map(fn _x -> 1 end)
     |> Enum.reduce(0,&(&1+&2))
@@ -139,7 +130,6 @@ defmodule Minesweeper do
 # - Se a posição {l,c} está fechada (contém "-"), escrever o número de minas adjascentes a esssa posição no tabuleiro (usar conta_minas)
 
 #def abre_posicao(tab,mapa_minas,l,c) do
-
 
 
 # abre_tabuleiro/2: recebe o mapa de Minas e o tabuleiro do jogo, e abre todo o tabuleiro do jogo, mostrando
