@@ -159,4 +159,67 @@ defmodule MinesweeperTest do
                                                                           ["*", "*","1"],
                                                                           ["-", "-","-"]]                                                                  
   end
+
+  test "gera_lista" do
+    assert Minesweeper.gera_lista(3,1) == [1,1,1]
+    assert Minesweeper.gera_lista(1,"*") == ["*"]
+  end
+
+  test "gera_tabuleiro" do
+    assert Minesweeper.gera_tabuleiro(3) == [["-", "-", "-"],
+                                            ["-", "-", "-"],
+                                            ["-", "-", "-"]]
+    assert Minesweeper.gera_tabuleiro(1) == [["-"]]
+  end
+
+  test "gera_mapa_de_minas" do
+    assert Minesweeper.gera_mapa_de_minas(3) == [[false, false, false],
+                                                [false, false, false],
+                                                [false, false, false]]
+    assert Minesweeper.gera_mapa_de_minas(1) == [[false]]
+  end
+
+  test "conta_fechadas" do
+    tab = [["2", "-", "-"],
+          ["-", "-", "-"],
+          ["-", "-", "-"]]
+    assert Minesweeper.conta_fechadas(tab) == 8
+
+    tab = [["2", "2", "2"],
+          ["2", "2", "2"],
+          ["2", "2", "2"]]
+    assert Minesweeper.conta_fechadas(tab) == 0
+  end
+
+  test "conta_minas" do
+    mines_board = [[false, false, false],
+                  [true, true, false],
+                  [false, false, false]]
+    assert Minesweeper.conta_minas(mines_board) == 2
+
+    mines_board = [[false, false, false],
+                  [false, false, false],
+                  [false, false, false]]
+    assert Minesweeper.conta_minas(mines_board) == 0
+  end
+
+  test "end_game" do
+    mines_board = [[false, false, false],
+                  [true, true, false],
+                  [false, false, false]]
+    tab = [["2", "2", "1"],
+          ["-", "-", "1"],
+          ["2", "2", "1"]]
+
+    assert Minesweeper.end_game(mines_board,tab) == true
+
+    mines_board = [[false, false, false],
+                  [true, true, false],
+                  [false, false, false]]
+    tab = [["2", "2", "1"],
+          ["-", "-", "1"],
+          ["2", "-", "1"]]
+
+    assert Minesweeper.end_game(mines_board,tab) == false
+  end
 end
