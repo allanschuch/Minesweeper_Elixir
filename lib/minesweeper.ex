@@ -1,5 +1,4 @@
 defmodule Minesweeper do
-  import Enum
   # PRIMEIRA PARTE - FUNÇÕES PARA MANIPULAR OS TABULEIROS DO JOGO (MATRIZES)
 
   # A ideia das próximas funções é permitir que a gente acesse uma lista usando um indice,
@@ -60,7 +59,7 @@ defmodule Minesweeper do
   # de tamanho 9, as posições 1x3,0x8 e 8x8 são exemplos de posições válidas. Exemplos de posições
   # inválidas seriam 9x0, 10x10 e -1x8
 
-  def is_valid_pos(tamanho,l,c), do: l <= tamanho && c <= tamanho
+  def is_valid_pos(tamanho,l,c), do: l < tamanho && l >= 0 && c < tamanho && c >= 0
 
   # valid_moves/3: Dado o tamanho do tabuleiro e uma posição atual (linha e coluna), retorna uma lista
   # com todas as posições adjacentes à posição atual
@@ -80,11 +79,11 @@ defmodule Minesweeper do
 
   def valid_moves(tam,l,c) do 
     get_adj(l,c) 
-    |> Enum.filter(fn -> 
+    |> Enum.filter(fn(x) -> 
       is_valid_pos(
         tam,
-        get_first(&1),
-        get_second(&1))
+        get_first(x),
+        get_second(x))
     end)
   end
 
@@ -97,9 +96,24 @@ defmodule Minesweeper do
   # conta_minas_adj/3: recebe um tabuleiro com o mapeamento das minas e uma  uma posicao  (linha e coluna), e conta quantas minas
   # existem nas posições adjacentes
 
-  # def conta_minas_adj(tab,l,c) do
-  #   (...)
-  # end
+  def conta_minas_adj(tab,l,c) do
+    get_adj(l,c) 
+    |> Enum.filter(fn(x) -> 
+      is_valid_pos(
+        get_tam(tab),
+        get_first(x),
+        get_second(x))
+      && is_mine(
+          tab,
+          get_first(x),
+          get_second(x))
+    end)
+    |> Enum.map(fn _x -> 1 end)
+    |> Enum.reduce(0,&(&1+&2))
+  end
+
+  def get_tam([_h|[]]), do: 1
+  def get_tam([_h|t]), do: 1 + get_tam(t)
 
   # abre_jogada/4: é a função principal do jogo!!
   # recebe uma posição a ser aberta (linha e coluna), o mapa de minas e o tabuleiro do jogo. Devolve como
@@ -118,15 +132,13 @@ defmodule Minesweeper do
   #   (...)
   #end
 
-# abre_posicao/4, que recebe um tabueiro de jogos, o mapa de minas, uma linha e uma coluna
+# abre_posicao/4, que recebe um tabuleiro de jogos, o mapa de minas, uma linha e uma coluna
 # Essa função verifica:
 # - Se a posição {l,c} já está aberta (contém um número), então essa posição não deve ser modificada
 # - Se a posição {l,c} contém uma mina no mapa de minas, então marcar  com "*" no tabuleiro
 # - Se a posição {l,c} está fechada (contém "-"), escrever o número de minas adjascentes a esssa posição no tabuleiro (usar conta_minas)
 
-  #def abre_posicao(tab,minas,l,c) do
-  # (...)
-  #end
+#def abre_posicao(tab,mapa_minas,l,c) do
 
 
 
