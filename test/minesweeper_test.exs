@@ -122,6 +122,18 @@ defmodule MinesweeperTest do
   end
 
   test "abre_tabuleiro" do
+    tab = [["-", "-", "-","-"],
+          ["-", "-", "-","-"],
+          ["-", "-", "1","-"],
+          ["-", "-", "-","-"]]
+    mines_board = [[true, false, true,true],
+                  [false, true, false,false],
+                  [false, false, false,false],
+                  [true, false, false,false]]
+    assert Minesweeper.abre_tabuleiro(tab,mines_board) == [["*", "3", "*","*"],
+                                                           ["2", "*", "3","2"],
+                                                           ["2", "2", "1","0"],
+                                                           ["*", "1", "0","0"]]
     mines_board = [[false, false, false],
                   [true, true, false],
                   [false, false, false]]
@@ -227,7 +239,7 @@ defmodule MinesweeperTest do
     tab = [["2", "2", "1"],
           ["-", "-", "1"],
           ["2", "-", "1"]]
-    assert Minesweeper.get_header(tab) == "     0 | 1 | 2\n______________\n"
+    assert Minesweeper.get_header(tab) == "     0 | 1 | 2\n_________________\n"
   end
 
   test "get_line" do
@@ -289,6 +301,18 @@ defmodule MinesweeperTest do
                   [false, false, false]]
     assert Minesweeper.abre_jogada({2,2},mines_board,tab) == [["-", "1", "0"],
                                                               ["1", "1", "0"],
-                                                              ["1", "0", "0"]]                                                                                                                   
+                                                              ["0", "0", "0"]]  
+    tab = [["-", "-", "-","-"],
+          ["-", "-", "-","-"],
+          ["-", "-", "1","-"],
+          ["-", "-", "-","-"]]
+    mines_board = [[false, false, false,false],
+                  [false, true, false,false],
+                  [false, false, false,false],
+                  [false, false, false,false]]
+    assert Minesweeper.abre_jogada({3,3},mines_board,tab) == [["-", "-", "1","0"],
+                                                              ["-", "-", "1","0"],
+                                                              ["1", "1", "1","0"],
+                                                              ["0", "0", "0","0"]]                                                                                                                                                                          
     end
 end
