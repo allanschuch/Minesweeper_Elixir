@@ -57,7 +57,7 @@ defmodule Minesweeper do
   #
   # esse tabuleiro possuí minas nas posições 4x4 e 5x5
 
-  def is_mine(tab,{l,c}), do: get_pos(tab,{l,c})
+  def is_mine(mines_board,{l,c}), do: get_pos(mines_board,{l,c})
 
   # is_valid_pos/3 recebe o tamanho do tabuleiro (ex, em um tabuleiro 9x9, o tamanho é 9),
   # uma linha e uma coluna, e diz se essa posição é válida no tabuleiro. Por exemplo, em um tabuleiro
@@ -94,11 +94,11 @@ defmodule Minesweeper do
   # conta_minas_adj/3: recebe um tabuleiro com o mapeamento das minas e uma  uma posicao  (linha e coluna), e conta quantas minas
   # existem nas posições adjacentes
 
-  def conta_minas_adj(tab,position) do
+  def conta_minas_adj(mines_board,position) do
     get_adj(position) 
     |> Enum.filter(fn(x) -> 
-      is_valid_pos(get_tam(tab),x)
-      && is_mine(tab,x)
+      is_valid_pos(get_tam(mines_board),x)
+      && is_mine(mines_board,x)
     end)
     |> Enum.count()
   end
@@ -120,9 +120,32 @@ defmodule Minesweeper do
   # - Se a posição a ser aberta não possui minas adjacentes, abrimos ela com zero (0) e recursivamente abrimos
   # as outras posições adjacentes a ela
 
-  #def abre_jogada(l,c,minas,tab) do
-  #   (...)
-  #end
+  def abre_jogada({l,c},mines_board,tab) do
+    value_on_position = get_pos(tab,{l,c})
+    cond do
+      is_mine(mines_board,{l,c}) -> tab
+      value_on_position != "-" -> tab
+      true -> 
+        minas_adj = conta_minas_adj(mines_board,{l,c})
+        cond do
+          minas_adj > 0 -> abre_posicao(tab,mines_board,{l,c})
+          minas_adj == 0 -> 
+            get_tam(tab)
+            |> valid_moves({l,c})
+            |> abre_posicoes_adj(tab,mines_board)
+        end
+    end
+  end
+
+  # def abre_posicoes_adj([posicao|[]],tab,mines_board), do: abre_jogada(posicao,mines_board,tab)
+
+  # def abre_posicoes_adj([posicao|t],tab,mines_board) do
+  #   abre_posicoes_adj(
+  #     t,
+  #     mines_board,
+  #     abre_jogada(posicao,mines_board,tab)
+  #   )
+  # end
 
 # abre_posicao/4, que recebe um tabuleiro de jogos, o mapa de minas, uma linha e uma coluna
 # Essa função verifica:
@@ -198,9 +221,47 @@ end
 # tabuleiro legal. Olhar os exemplos no .pdf com a especificação do trabalho. Não esquecer de usar \n para quebra de linhas.
 # Você pode quebrar essa função em mais de uma: print_header, print_linhas, etc...
 
-  #def board_to_string(tab) do
-  # (...)
-  #end
+  def board_to_string(tab) do
+    get_header(tab)
+    <> get_all_lines(tab)
+    <> "\n"
+  end
+
+  def test_print_board(tab), do: IO.puts(board_to_string(tab))
+
+  def get_header(tab) do
+    tam = get_tam(tab)
+    header = gen_header(tam)
+    |> Enum.join(" | ")
+
+    "     " <> header <> "\n"
+    <> gera_repeticao_char(tam*3+5,"_")
+    <> "\n"
+  end
+
+  def gera_repeticao_char(1,char), do: char
+  def gera_repeticao_char(n,char), do: char <> gera_repeticao_char(n-1,char)
+
+  def get_all_lines(tab), do: get_all_lines_aux(tab,get_tam(tab))
+
+  def get_all_lines_aux([tab_line|_t],1) do
+    line = 
+    get_tam(tab_line) - 1
+    |> Integer.to_string
+    line <> "  | " <> get_line(tab_line)
+  end 
+
+  def get_all_lines_aux([tab_line|t],tam) do
+    line = 
+    get_tam(tab_line) - tam
+    |> Integer.to_string
+    line <> "  | " <> get_line(tab_line) <> get_all_lines_aux(t,tam-1)
+  end
+
+  def get_line(tab_line), do: Enum.join(tab_line," | ") <> "\n"
+
+  defp gen_header(1), do: [0]
+  defp gen_header(tam), do: gen_header(tam-1) ++ [tam-1]
 
 # gera_lista/2: recebe um inteiro n, um valor v, e gera uma lista contendo n vezes o valor v
 
@@ -253,7 +314,7 @@ end
 # Somente descomentar essas linhas quando as funções do módulo anterior estiverem
 # todas implementadas
 
-defmodule Motor do
+#defmodule Motor do
 #  def main() do
 #   v = IO.gets("Digite o tamanho do tabuleiro: \n")
 #   {size,_} = Integer.parse(v)
@@ -262,6 +323,7 @@ defmodule Motor do
 #   tabuleiro = Minesweeper.gera_tabuleiro(size)
 #   game_loop(minas,tabuleiro)
 #  end
+
 #  def game_loop(minas,tabuleiro) do
 #    IO.puts Minesweeper.board_to_string(tabuleiro)
 #    v = IO.gets("Digite uma linha: \n")
@@ -296,6 +358,6 @@ defmodule Motor do
 #      add_mines(n-1,size,Minesweeper.update_pos(mines,linha,coluna,true))
 #    end
 #  end
-end
+#end
 
 #Motor.main()

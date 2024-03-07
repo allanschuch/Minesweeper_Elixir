@@ -222,4 +222,73 @@ defmodule MinesweeperTest do
 
     assert Minesweeper.end_game(mines_board,tab) == false
   end
+
+  test "get_header" do
+    tab = [["2", "2", "1"],
+          ["-", "-", "1"],
+          ["2", "-", "1"]]
+    assert Minesweeper.get_header(tab) == "     0 | 1 | 2\n______________\n"
+  end
+
+  test "get_line" do
+    assert Minesweeper.get_line(["2", "2", "1"]) == "2 | 2 | 1\n"
+  end
+
+  test "get_all_lines" do
+    tab = [["2", "2", "1"],
+          ["-", "-", "1"],
+          ["2", "-", "1"]]
+    assert Minesweeper.get_all_lines(tab) == 
+    "0  | 2 | 2 | 1\n1  | - | - | 1\n2  | 2 | - | 1\n"
+  end
+
+  test "gera_repeticao_char" do
+    assert Minesweeper.gera_repeticao_char(5,"_") == "_____"
+  end
+
+  test "print_board_test" do
+    tab = [["2", "2", "1"],
+          ["-", "-", "1"],
+          ["2", "-", "1"]]
+    Minesweeper.test_print_board(tab)
+  end
+
+  test "abre_jogada" do
+    tab = [["-", "-", "-"],
+          ["-", "-", "-"],
+          ["-", "-", "-"]]
+    mines_board = [[false, false, false],
+                  [false, true, false],
+                  [false, false, false]]
+    assert Minesweeper.abre_jogada({0,0},mines_board,tab) == [["1", "-", "-"],
+                                                              ["-", "-", "-"],
+                                                              ["-", "-", "-"]]
+    tab = [["-", "-", "-"],
+          ["-", "-", "-"],
+          ["-", "-", "-"]]
+    mines_board = [[false, false, false],
+                  [false, true, false],
+                  [false, false, false]]
+    assert Minesweeper.abre_jogada({1,1},mines_board,tab) == [["-", "-", "-"],
+                                                              ["-", "-", "-"],
+                                                              ["-", "-", "-"]]
+    tab = [["-", "-", "-"],
+          ["-", "-", "-"],
+          ["-", "1", "-"]]
+    mines_board = [[false, false, false],
+                  [false, true, false],
+                  [false, false, false]]
+    assert Minesweeper.abre_jogada({2,1},mines_board,tab) == [["-", "-", "-"],
+                                                              ["-", "-", "-"],
+                                                              ["-", "1", "-"]] 
+    tab = [["-", "-", "-"],
+          ["-", "-", "-"],
+          ["-", "-", "-"]]
+    mines_board = [[true, false, false],
+                  [false, false, false],
+                  [false, false, false]]
+    assert Minesweeper.abre_jogada({2,2},mines_board,tab) == [["-", "1", "0"],
+                                                              ["1", "1", "0"],
+                                                              ["1", "0", "0"]]                                                                                                                   
+    end
 end
