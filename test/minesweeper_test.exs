@@ -119,6 +119,10 @@ defmodule MinesweeperTest do
     assert Minesweeper.abre_posicao(tab,mines_board,{1,1}) == [["2", "-", "-"],
                                                               ["-", "*", "-"],
                                                               ["-", "-", "-"]]
+    tab = [["-", "-", "-","-"],
+          ["-", "-", "-","-"],
+          ["-", "-", "1","-"],
+          ["-", "-", "-","-"]]                                                        
   end
 
   test "abre_tabuleiro" do
@@ -130,7 +134,7 @@ defmodule MinesweeperTest do
                   [false, true, false,false],
                   [false, false, false,false],
                   [true, false, false,false]]
-    assert Minesweeper.abre_tabuleiro(tab,mines_board) == [["*", "3", "*","*"],
+    assert Minesweeper.abre_tabuleiro(mines_board,tab) == [["*", "3", "*","*"],
                                                            ["2", "*", "3","2"],
                                                            ["2", "2", "1","0"],
                                                            ["*", "1", "0","0"]]
@@ -140,7 +144,7 @@ defmodule MinesweeperTest do
     tab = [["2", "-", "-"],
           ["-", "-", "-"],
           ["-", "-", "-"]]
-    assert Minesweeper.abre_tabuleiro(tab,mines_board) == [["2", "2", "1"],
+    assert Minesweeper.abre_tabuleiro(mines_board,tab) == [["2", "2", "1"],
                                                           ["*", "*", "1"],
                                                           ["2", "2", "1"]]
   end
@@ -239,7 +243,7 @@ defmodule MinesweeperTest do
     tab = [["2", "2", "1"],
           ["-", "-", "1"],
           ["2", "-", "1"]]
-    assert Minesweeper.get_header(tab) == "     0 | 1 | 2\n_________________\n"
+    assert Minesweeper.get_header(tab) == "     0 | 1 | 2 | \n-----------------\n"
   end
 
   test "get_line" do
@@ -313,6 +317,41 @@ defmodule MinesweeperTest do
     assert Minesweeper.abre_jogada({3,3},mines_board,tab) == [["-", "-", "1","0"],
                                                               ["-", "-", "1","0"],
                                                               ["1", "1", "1","0"],
-                                                              ["0", "0", "0","0"]]                                                                                                                                                                          
-    end
+                                                              ["0", "0", "0","0"]]
+    mines_board = [[false, false, false,false],
+                  [false, false, false,false],
+                  [false, false, false,false],
+                  [false, false, false,true]]
+    assert Minesweeper.abre_jogada({0,0},mines_board,tab) == [["0", "0", "0","0"],
+                                                               ["0", "0", "0","0"],
+                                                               ["0", "0", "1","1"],
+                                                               ["0", "0", "1","-"]]                                                                                                                                                                                                                                     
+  end
+
+  test "marca_posicao" do
+    tab = [["-", "-", "1","0"],
+          ["-", "-", "1","0"],
+          ["1", "1", "1","0"],
+          ["0", "0", "0","0"]]
+    assert Minesweeper.marca_posicao(tab,{0,0}) == [["X", "-", "1","0"],
+                                                    ["-", "-", "1","0"],
+                                                    ["1", "1", "1","0"],
+                                                    ["0", "0", "0","0"]]
+    tab = [["-", "-", "1","0"],
+          ["-", "-", "1","0"],
+          ["1", "1", "1","0"],
+          ["0", "0", "0","0"]]
+    assert Minesweeper.marca_posicao(tab,{3,2}) == [["-", "-", "1","0"],
+                                                    ["-", "-", "1","0"],
+                                                    ["1", "1", "1","0"],
+                                                    ["0", "0", "0","0"]]
+    tab = [["-", "-", "1","0"],
+          ["-", "-", "1","0"],
+          ["1", "1", "1","0"],
+          ["0", "0", "0","0"]]
+    assert Minesweeper.marca_posicao(tab,{1,0}) == [["-", "-", "1","0"],
+                                                    ["X", "-", "1","0"],
+                                                    ["1", "1", "1","0"],
+                                                    ["0", "0", "0","0"]]                                                   
+  end
 end
