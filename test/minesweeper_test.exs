@@ -247,7 +247,7 @@ defmodule MinesweeperTest do
   end
 
   test "get_line" do
-    assert Minesweeper.get_line(["2", "2", "1"]) == "2 | 2 | 1\n"
+    assert Minesweeper.get_line(["2", "2", "1"]) == "\e[32m2\e[0m | \e[32m2\e[0m | \e[34m1 |\e[0m\n"
   end
 
   test "get_all_lines" do
@@ -255,7 +255,7 @@ defmodule MinesweeperTest do
           ["-", "-", "1"],
           ["2", "-", "1"]]
     assert Minesweeper.get_all_lines(tab) == 
-    "0  | 2 | 2 | 1\n1  | - | - | 1\n2  | 2 | - | 1\n"
+    "0  | \e[32m2\e[0m | \e[32m2\e[0m | \e[34m1 |\e[0m\n1  | - | - | \e[34m1 |\e[0m\n2  | \e[32m2\e[0m | - | \e[34m1 |\e[0m\n"
   end
 
   test "gera_repeticao_char" do
@@ -362,5 +362,13 @@ defmodule MinesweeperTest do
     assert Minesweeper.is_integer?("outra_string") == false
     assert Minesweeper.is_integer?("") == false
     assert Minesweeper.is_integer?("-") == false
+  end
+
+  test "get_entries" do
+    assert Minesweeper.get_entries("resources/best_scores.txt") == [{"1","20.0"},{"2","22.2"}]
+  end
+
+  test "get_best_score" do
+    assert Minesweeper.get_best_score(1) == "20.0"
   end
 end

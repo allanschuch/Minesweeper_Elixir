@@ -361,8 +361,10 @@ end
   
   def end_game(mines_board,tab), do:  conta_fechadas(tab) == conta_minas(mines_board)
 
-  def get_melhor_tempo() do
-    read_file("melhor_tempo.txt")
+  def get_best_score(board_size) do
+    [{_,time}] = get_entries("resources/best_scores.txt")
+    |> Enum.filter(fn {size,_score} -> size == Integer.to_string(board_size) end)
+    time
   end
 
   def read_file(file_path) do
@@ -371,6 +373,13 @@ end
       :ok -> content
       _ -> "Erro ao ler o arquivo."
     end
+  end
+
+  def get_entries(file_path) do
+    read_file(file_path)
+    |> String.split(" ")
+    |> Enum.chunk_every(2)
+    |> Enum.zip
   end
 
 #### fim do módulo
@@ -474,4 +483,4 @@ defmodule Motor do
   end
 end
 
-Motor.main()
+#Motor.main()
