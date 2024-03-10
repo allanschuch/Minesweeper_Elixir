@@ -354,4 +354,13 @@ defmodule MinesweeperTest do
                                                     ["1", "1", "1","0"],
                                                     ["0", "0", "0","0"]]                                                   
   end
+
+  test "is_integer?" do
+    assert Minesweeper.is_integer?("123") == true
+    assert Minesweeper.is_integer?("-1") == true
+    assert Minesweeper.is_integer?("4") == true
+    assert Minesweeper.is_integer?("outra_string") == false
+    assert Minesweeper.is_integer?("") == false
+    assert Minesweeper.is_integer?("-") == false
+  end
 end

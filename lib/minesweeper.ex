@@ -271,7 +271,44 @@ end
     end
   end
 
-  def get_line(tab_line), do: Enum.join(tab_line," | ") <> "\n"
+  def get_line([value|[]]) do
+    cond do
+      is_integer?(value) ->
+        case value do
+          "0" -> "\e[36m0 |\e[0m\n"
+          "1" -> "\e[34m1 |\e[0m\n"
+          "2" -> "\e[32m2 |\e[0m\n"
+          "3" -> "\e[31m3 |\e[0m\n"
+          "4" -> "\e[35m4 |\e[0m\n"
+          "5" -> "\e[33m5 |\e[0m\n"
+          _ -> value <> " |\n"
+        end 
+      true -> value <> " |\n"
+    end
+  end 
+
+  def get_line([value|t]) do
+    cond do
+      is_integer?(value) ->
+        case value do
+          "0" -> "\e[36m0\e[0m | " <> get_line(t) 
+          "1" -> "\e[34m1\e[0m | " <> get_line(t)
+          "2" -> "\e[32m2\e[0m | " <> get_line(t)
+          "3" -> "\e[31m3\e[0m | " <> get_line(t)
+          "4" -> "\e[35m4\e[0m | " <> get_line(t)
+          "5" -> "\e[33m5\e[0m | " <> get_line(t)
+          _ -> value <> " | " <> get_line(t)
+        end 
+      true -> value <> " | " <> get_line(t)
+    end
+  end
+
+  def is_integer?(string) do
+    case Integer.parse(string) do
+      {_integer,""} -> true
+      _ -> false
+    end
+  end
 
   defp gen_header(1), do: Integer.to_string(0) <> " | "
 
@@ -324,6 +361,18 @@ end
   
   def end_game(mines_board,tab), do:  conta_fechadas(tab) == conta_minas(mines_board)
 
+  def get_melhor_tempo() do
+    read_file("melhor_tempo.txt")
+  end
+
+  def read_file(file_path) do
+    {status, content} = File.read(file_path)
+    case status do
+      :ok -> content
+      _ -> "Erro ao ler o arquivo."
+    end
+  end
+
 #### fim do módulo
 end
 
@@ -336,8 +385,7 @@ end
 
 defmodule Motor do
   def main() do
-   v = IO.gets("Digite o tamanho do tabuleiro: \n")
-   {size,_} = Integer.parse(v)
+   size = get_board_size()
    minas = gen_mines_board(size)
    IO.inspect minas
    tabuleiro = Minesweeper.gera_tabuleiro(size)
@@ -346,7 +394,7 @@ defmodule Motor do
 
   def game_loop(minas,tabuleiro) do
     IO.puts Minesweeper.board_to_string(tabuleiro)
-    {linha,coluna} = get_input(tabuleiro)
+    {linha,coluna} = get_player_input(tabuleiro)
     case IO.gets("Deseja Abrir (ENTER) ou Marcar (QUALQUER OUTRA ENTRADA): ") do
       "\n" -> 
         if (Minesweeper.is_mine(minas,{linha,coluna})) do
@@ -401,7 +449,7 @@ defmodule Motor do
     end
   end
 
-  def get_input(tab) do
+  def get_player_input(tab) do
     v = IO.gets("Digite uma linha: \n")
     {linha,_} = Integer.parse(v)
     v = IO.gets("Digite uma coluna: \n")
@@ -410,7 +458,18 @@ defmodule Motor do
       {linha,coluna}
     else
       IO.puts "\nEntrada inválida! Tente denovo\n"
-      get_input(tab)
+      get_player_input(tab)
+    end
+  end
+
+  def get_board_size() do
+    v = IO.gets("Digite o tamanho do tabuleiro: \n")
+    {size,_} = Integer.parse(v)
+    if (size >= 2) do
+        size
+    else
+      IO.puts "\nTamanho de tabuleiro inválido! Tente denovo\n"
+      get_board_size()
     end
   end
 end
