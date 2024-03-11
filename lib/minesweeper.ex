@@ -156,31 +156,31 @@ defmodule Minesweeper do
 # - Se a posição {l,c} contém uma mina no mapa de minas, então marcar  com "*" no tabuleiro
 # - Se a posição {l,c} está fechada (contém "-"), escrever o número de minas adjascentes a essa posição no tabuleiro (usar conta_minas)
 
-def abre_posicao(tab,mines_board,position) do
-  cond do
-    is_mine(mines_board,position) ->
-      update_pos(
-        tab,
-        position,
-        "*"
-      )
-    get_pos(tab,position) == "-" ->
-      update_pos(
-        tab,
-        position,
-        conta_minas_adj(mines_board,position)
-        |> Integer.to_string
-      )
-    true -> tab
+  def abre_posicao(tab,mines_board,position) do
+    cond do
+      is_mine(mines_board,position) ->
+        update_pos(
+          tab,
+          position,
+          "*"
+        )
+      get_pos(tab,position) == "-" ->
+        update_pos(
+          tab,
+          position,
+          conta_minas_adj(mines_board,position)
+          |> Integer.to_string
+        )
+      true -> tab
+    end
   end
-end
 
-def marca_posicao(tab,position) do
-  case get_pos(tab,position) do
-    "-" -> update_pos(tab,position,"X")
-    _ -> tab
+  def marca_posicao(tab,position) do
+    case get_pos(tab,position) do
+      "-" -> update_pos(tab,position,"X")
+      _ -> tab
+    end
   end
-end
 
 # abre_tabuleiro/2: recebe o mapa de Minas e o tabuleiro do jogo, e abre todo o tabuleiro do jogo, mostrando
 # onde estão as minas e os números nas posições adjacentes às minas.Essa função é usada para mostrar
@@ -241,7 +241,7 @@ end
 
   def get_header(tab) do
     tam = get_tam(tab)
-    "     " <> gen_header(tam) <> "\n"
+    "\n     " <> gen_header(tam) <> "\n"
     <> gera_repeticao_char(tam*4+5,"-")
     <> "\n"
   end
@@ -356,31 +356,10 @@ end
     |> Enum.count()
   end
 
-# end_game?/2: recebe o tabuleiro de minas, o tauleiro do jogo, e diz se o jogo acabou.
+# check_end_game?/2: recebe o tabuleiro de minas, o tauleiro do jogo, e diz se o jogo acabou.
 # O jogo acabou quando o número de casas fechadas é igual ao numero de minas
   
-  def end_game(mines_board,tab), do:  conta_fechadas(tab) == conta_minas(mines_board)
-
-  def get_best_score(board_size) do
-    [{_,time}] = get_entries("resources/best_scores.txt")
-    |> Enum.filter(fn {size,_score} -> size == Integer.to_string(board_size) end)
-    time
-  end
-
-  def read_file(file_path) do
-    {status, content} = File.read(file_path)
-    case status do
-      :ok -> content
-      _ -> "Erro ao ler o arquivo."
-    end
-  end
-
-  def get_entries(file_path) do
-    read_file(file_path)
-    |> String.split(" ")
-    |> Enum.chunk_every(2)
-    |> Enum.zip
-  end
+  def check_end_game(mines_board,tab), do:  conta_fechadas(tab) == conta_minas(mines_board)
 
 #### fim do módulo
 end
@@ -393,12 +372,21 @@ end
 # todas implementadas
 
 defmodule Motor do
+  @best_scores_list_dir_path "resources"
+
+  def get_best_scores_list_dir_path(), do: @best_scores_list_dir_path
+
   def main() do
-   size = get_board_size()
-   minas = gen_mines_board(size)
-   IO.inspect minas
-   tabuleiro = Minesweeper.gera_tabuleiro(size)
-   game_loop(minas,tabuleiro)
+    size = get_board_size()
+    minas = gen_mines_board(size)
+    #IO.inspect minas
+    tabuleiro = Minesweeper.gera_tabuleiro(size)
+    start_time = :os.system_time(:millisecond)
+    result = game_loop(minas,tabuleiro)
+    end_time = :os.system_time(:millisecond)
+    elapsed_time_in_seconds = (end_time - start_time) / 1000.00 |> Float.round(2)
+    endgame(result,size,elapsed_time_in_seconds)
+    try_again()
   end
 
   def game_loop(minas,tabuleiro) do
@@ -409,14 +397,14 @@ defmodule Motor do
         if (Minesweeper.is_mine(minas,{linha,coluna})) do
           IO.puts "\nVOCÊ PERDEU!!!!!!!!!!!!!!!!\n"
           IO.puts Minesweeper.board_to_string(Minesweeper.abre_tabuleiro(minas,tabuleiro))
-          try_again()
+          :failure
         else
           novo_tabuleiro = Minesweeper.abre_jogada({linha,coluna},minas,tabuleiro)
-          if (Minesweeper.end_game(minas,novo_tabuleiro)) do
+          if (Minesweeper.check_end_game(minas,novo_tabuleiro)) do
               IO.puts "\nVOCÊ VENCEU!!!!!!!!!!!!!!\n"
               IO.puts Minesweeper.board_to_string(Minesweeper.abre_tabuleiro(minas,novo_tabuleiro))
               IO.puts "PARABÉNS!!!!!!!!!!!!!!!!!\n"
-              try_again()
+              :victory
           else
             game_loop(minas,novo_tabuleiro)
           end
@@ -481,6 +469,102 @@ defmodule Motor do
       get_board_size()
     end
   end
+
+  def endgame(result,board_size,score) do
+    file_path = get_best_scores_list_dir_path() <> "/best_scores.txt"
+    best_scores_list = Score.get_best_scores_list(file_path)
+    case result do
+      :victory -> 
+        best_scores_list = Score.upload_score(best_scores_list,board_size,score)
+        Score.save_best_scores_list(best_scores_list, file_path)
+        {:best_score, best_score} = Score.get_best_score(best_scores_list,board_size)
+        IO.puts(
+          "\nTAMANHO #{board_size}x#{board_size}\n
+          Seu tempo: #{score}s\n
+          Melhor tempo neste tamanho: #{best_score}s\n"
+        )
+      :failure -> nil 
+    end
+  end
 end
 
-#Motor.main()
+defmodule Score do
+  def get_best_score([],_board_size), do: {:no_best_score,"There is no best score for this board size"}
+
+  def get_best_score([{entry_board_size,score}|t],board_size) do
+    if (entry_board_size == board_size) do
+      {:best_score,score}
+    else 
+      get_best_score(t,board_size)
+    end
+  end
+
+  def read_file(file_path) do
+    {status, content} = File.read(file_path)
+    case status do
+      :ok -> content
+      _ -> "Erro ao ler o arquivo."
+    end
+  end
+
+  def get_best_scores_list(file_path) do
+    cond do
+      File.exists?(file_path) ->
+        file_content = read_file(file_path)
+        case file_content do
+          "" -> []
+          _  -> 
+            file_content_list =
+            file_content 
+            |> String.split(" ")
+            number_of_elements = Enum.count(file_content_list,&(Minesweeper.is_integer?(&1)))
+            Enum.chunk_every(file_content_list,number_of_elements) 
+            |> Enum.zip
+            |> Enum.map(fn {board_size,score} -> {String.to_integer(board_size),String.to_float(score)} end) 
+        end
+      true -> 
+        Motor.get_best_scores_list_dir_path
+        |> File.mkdir_p()
+        File.write(file_path,"",[:write])
+        get_best_scores_list(file_path)
+    end
+  end
+        
+  def upload_score(best_scores_list,board_size,score) do
+    case get_best_score(best_scores_list,board_size) do
+      {:best_score,best_score} -> 
+        if(score < best_score) do
+          update_best_score(best_scores_list,board_size,score)
+        else
+          best_scores_list
+        end
+      {:no_best_score,_} -> nil
+        new_board_size_best_score(best_scores_list,board_size,score)  
+    end
+  end
+
+  def update_best_score(best_scores_list,board_size,new_best_score) do
+    best_scores_list
+    |> Enum.map(fn
+    {size,_} when size == board_size -> {board_size,new_best_score}
+    entry -> entry
+    end)
+  end
+
+  def new_board_size_best_score(best_scores_list,board_size,new_best_score) do
+    best_scores_list ++ [{board_size,new_best_score}]
+  end
+
+  def save_best_scores_list(best_scores_list,file_path) do
+    {list1,list2} =  
+    best_scores_list
+    |> Enum.map(fn {board_size,score} -> {Integer.to_string(board_size),Float.to_string(score)} end)
+    |> Enum.unzip
+    best_scores_list_string =
+    list1 ++ list2
+    |> Enum.join(" ")
+    File.write(file_path,best_scores_list_string,[:write])
+  end
+end
+
+Motor.main()

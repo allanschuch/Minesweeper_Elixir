@@ -118,11 +118,7 @@ defmodule MinesweeperTest do
           ["-", "-", "-"]]
     assert Minesweeper.abre_posicao(tab,mines_board,{1,1}) == [["2", "-", "-"],
                                                               ["-", "*", "-"],
-                                                              ["-", "-", "-"]]
-    tab = [["-", "-", "-","-"],
-          ["-", "-", "-","-"],
-          ["-", "-", "1","-"],
-          ["-", "-", "-","-"]]                                                        
+                                                              ["-", "-", "-"]]                                                       
   end
 
   test "abre_tabuleiro" do
@@ -219,7 +215,7 @@ defmodule MinesweeperTest do
     assert Minesweeper.conta_minas(mines_board) == 0
   end
 
-  test "end_game" do
+  test "check_end_game" do
     mines_board = [[false, false, false],
                   [true, true, false],
                   [false, false, false]]
@@ -227,7 +223,7 @@ defmodule MinesweeperTest do
           ["-", "-", "1"],
           ["2", "2", "1"]]
 
-    assert Minesweeper.end_game(mines_board,tab) == true
+    assert Minesweeper.check_end_game(mines_board,tab) == true
 
     mines_board = [[false, false, false],
                   [true, true, false],
@@ -236,14 +232,14 @@ defmodule MinesweeperTest do
           ["-", "-", "1"],
           ["2", "-", "1"]]
 
-    assert Minesweeper.end_game(mines_board,tab) == false
+    assert Minesweeper.check_end_game(mines_board,tab) == false
   end
 
   test "get_header" do
     tab = [["2", "2", "1"],
           ["-", "-", "1"],
           ["2", "-", "1"]]
-    assert Minesweeper.get_header(tab) == "     0 | 1 | 2 | \n-----------------\n"
+    assert Minesweeper.get_header(tab) == "\n     0 | 1 | 2 | \n-----------------\n"
   end
 
   test "get_line" do
@@ -364,11 +360,30 @@ defmodule MinesweeperTest do
     assert Minesweeper.is_integer?("-") == false
   end
 
-  test "get_entries" do
-    assert Minesweeper.get_entries("resources/best_scores.txt") == [{"1","20.0"},{"2","22.2"}]
+  test "get_best_scores_list" do
+    File.rm("resources/best_scores.txt")
+    assert Score.get_best_scores_list("resources/best_scores.txt") == []
+    File.write("resources/best_scores.txt","1 2 20.0 22.2",[:write])
+    assert Score.get_best_scores_list("resources/best_scores.txt") == [{1,20.0},{2,22.2}]
   end
 
   test "get_best_score" do
-    assert Minesweeper.get_best_score(1) == "20.0"
+    assert Score.get_best_score([{1,20.0},{2,22.2}],1) == {:best_score,20.0}
+    assert Score.get_best_score([{1,20.0},{2,22.2}],3) == {:no_best_score,"There is no best score for this board size"}
+    assert Score.get_best_score([],3) == {:no_best_score,"There is no best score for this board size"}
+  end
+
+  test "update_best_score" do
+    assert Score.update_best_score([{1,20.0},{2,22.2}],2,20.2) == [{1,20.0},{2,20.2}]
+  end
+
+  test "new_board_size_best_score" do
+    assert Score.new_board_size_best_score([{1,20.0},{2,22.2}],3,17.56) == [{1,20.0},{2,22.2},{3,17.56}]
+  end
+
+  test "upload_score" do
+    assert Score.upload_score([{1,20.0},{2,22.2}],1,19.0) == [{1,19.0},{2,22.2}]
+    assert Score.upload_score([{1,20.0},{2,22.2}],1,21.5) == [{1,20.0},{2,22.2}]
+    assert Score.upload_score([{1,20.0},{2,22.2}],3,19.0) == [{1,20.0},{2,22.2},{3,19.0}]
   end
 end
