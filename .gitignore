@@ -25,3 +25,5 @@ minesweeper-*.tar
 # Temporary files, for example, from tests.
 /tmp/
 .vscode/launch.json
+resources
+resources/best_scores.txt
