@@ -124,7 +124,7 @@ defmodule Minesweeper do
     value_on_position = get_pos(tab,{l,c})
     cond do
       is_mine(mines_board,{l,c}) -> tab
-      value_on_position != "-" -> tab
+      value_on_position != "-" && value_on_position != "X" -> tab
       true -> 
         minas_adj = conta_minas_adj(mines_board,{l,c})
         cond do
@@ -164,7 +164,7 @@ defmodule Minesweeper do
           position,
           "*"
         )
-      get_pos(tab,position) == "-" ->
+      get_pos(tab,position) == "-" || get_pos(tab,position) == "X" ->
         update_pos(
           tab,
           position,
@@ -275,12 +275,12 @@ defmodule Minesweeper do
     cond do
       is_integer?(value) ->
         case value do
-          "0" -> "\e[36m0 |\e[0m\n"
-          "1" -> "\e[34m1 |\e[0m\n"
-          "2" -> "\e[32m2 |\e[0m\n"
-          "3" -> "\e[31m3 |\e[0m\n"
-          "4" -> "\e[35m4 |\e[0m\n"
-          "5" -> "\e[33m5 |\e[0m\n"
+          "0" -> "\e[36m0\e[0m |\n"
+          "1" -> "\e[34m1\e[0m |\n"
+          "2" -> "\e[32m2\e[0m |\n"
+          "3" -> "\e[31m3\e[0m |\n"
+          "4" -> "\e[35m4\e[0m |\n"
+          "5" -> "\e[33m5\e[0m |\n"
           _ -> value <> " |\n"
         end 
       true -> value <> " |\n"
