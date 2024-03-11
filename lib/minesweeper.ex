@@ -447,21 +447,34 @@ defmodule Motor do
   end
 
   def get_player_input(tab) do
-    v = IO.gets("Digite uma linha: \n")
-    {linha,_} = Integer.parse(v)
-    v = IO.gets("Digite uma coluna: \n")
-    {coluna,_} = Integer.parse(v)
+    {linha,coluna} = get_linha_coluna()
     if (Minesweeper.get_tam(tab) |> Minesweeper.is_valid_pos({linha,coluna})) do
       {linha,coluna}
     else
-      IO.puts "\nEntrada inválida! Tente denovo\n"
+      IO.puts "\nPosição inválida! Tente denovo\n"
       get_player_input(tab)
     end
   end
 
+  defp get_linha_coluna() do
+    linha = get_integer_input("Digite uma linha: ")
+    coluna = get_integer_input("Digite uma coluna: ")
+    {linha,coluna}
+  end
+
+  defp get_integer_input(message) do
+    input = IO.gets(message)
+    try do
+      String.trim(input,"\n") |> String.to_integer
+    rescue
+      ArgumentError ->
+        IO.puts "\nEntrada inválida! Tente denovo\n"
+        get_integer_input(message)
+    end
+  end
+
   def get_board_size() do
-    v = IO.gets("Digite o tamanho do tabuleiro: \n")
-    {size,_} = Integer.parse(v)
+    size = get_integer_input("Digite o tamanho do tabuleiro: ")
     if (size >= 2) do
         size
     else
