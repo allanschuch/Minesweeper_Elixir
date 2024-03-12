@@ -178,6 +178,7 @@ defmodule Minesweeper do
   def marca_posicao(tab,position) do
     case get_pos(tab,position) do
       "-" -> update_pos(tab,position,"X")
+      "X" -> update_pos(tab,position,"-")
       _ -> tab
     end
   end
@@ -392,7 +393,7 @@ defmodule Motor do
   def game_loop(minas,tabuleiro) do
     IO.puts Minesweeper.board_to_string(tabuleiro)
     {linha,coluna} = get_player_input(tabuleiro)
-    case IO.gets("Deseja Abrir (ENTER) ou Marcar (QUALQUER OUTRA ENTRADA): ") do
+    case IO.gets("Deseja \e[36mAbrir a posição\e[0m (ENTER) ou \e[34mMarcar/Desmarcar\e[0m presença de mina (X): ") do
       "\n" -> 
         if (Minesweeper.is_mine(minas,{linha,coluna})) do
           IO.puts "\nVOCÊ PERDEU!!!!!!!!!!!!!!!!\n"
