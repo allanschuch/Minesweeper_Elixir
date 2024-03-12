@@ -393,8 +393,8 @@ defmodule Motor do
   def game_loop(minas,tabuleiro) do
     IO.puts Minesweeper.board_to_string(tabuleiro)
     {linha,coluna} = get_player_input(tabuleiro)
-    case IO.gets("Deseja \e[36mAbrir a posição\e[0m (ENTER) ou \e[34mMarcar/Desmarcar\e[0m presença de mina (X): ") do
-      "\n" -> 
+    case get_mark_or_open_input() do
+      :open -> 
         if (Minesweeper.is_mine(minas,{linha,coluna})) do
           IO.puts "\nVOCÊ PERDEU!!!!!!!!!!!!!!!!\n"
           IO.puts Minesweeper.board_to_string(Minesweeper.abre_tabuleiro(minas,tabuleiro))
@@ -410,9 +410,20 @@ defmodule Motor do
             game_loop(minas,novo_tabuleiro)
           end
         end
-      _ -> 
+      :mark -> 
         novo_tabuleiro = Minesweeper.marca_posicao(tabuleiro,{linha,coluna})
-        game_loop(minas,novo_tabuleiro) 
+        game_loop(minas,novo_tabuleiro)
+    end
+  end
+  
+  def get_mark_or_open_input() do
+    case IO.gets("Deseja \e[36mAbrir a posição\e[0m (ENTER) ou \e[34mMarcar/Desmarcar\e[0m presença de mina (X): ") do
+      "\n" -> :open
+      "X\n" -> :mark
+      "x\n" -> :mark
+      _ -> 
+        IO.puts "\nEntrada inválida! Pressione ENTER para \e[36mAbrir a posição\e[0m ou X para \e[34mMarcar/Desmarcar\e[0m presença de mina!\n"
+        get_mark_or_open_input()
     end
   end
 
