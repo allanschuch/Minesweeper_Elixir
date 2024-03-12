@@ -27,3 +27,5 @@ minesweeper-*.tar
 .vscode/launch.json
 resources
 resources/best_scores.txt
+jogar.bat
+install.bat
