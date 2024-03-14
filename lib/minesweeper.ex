@@ -124,7 +124,7 @@ defmodule Minesweeper do
     value_on_position = get_pos(tab,{l,c})
     cond do
       is_mine(mines_board,{l,c}) -> tab
-      value_on_position != "-" && value_on_position != "X" -> tab
+      value_on_position != "-" -> tab
       true -> 
         minas_adj = conta_minas_adj(mines_board,{l,c})
         cond do
@@ -164,7 +164,7 @@ defmodule Minesweeper do
           position,
           "*"
         )
-      get_pos(tab,position) == "-" || get_pos(tab,position) == "X" ->
+      get_pos(tab,position) == "-" ->
         update_pos(
           tab,
           position,
